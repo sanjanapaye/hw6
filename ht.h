@@ -279,6 +279,7 @@ private:
     // ADD MORE DATA MEMBERS HERE, AS NECESSARY
     size_t deleteditems;
     double resizeAlpha_;
+    size_t items;
 
 };
 
@@ -306,6 +307,7 @@ HashTable<K,V,Prober,Hash,KEqual>::HashTable(
     resizeAlpha_ = resizeAlpha;
     mIndex_= 0;
     deleteditems = 0;
+    items = 0;
     table_.resize(CAPACITIES[mIndex_]);
 }
 
@@ -355,11 +357,7 @@ size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
-    //cout <<"insert"<< endl;
-    //cout << (static_cast<double>(size())+deleteditems)/table_.size() <<endl;
-    //cout << "resize "<<resizeAlpha_ << endl;
-    if(((static_cast<double>(size())+deleteditems)/table_.size() >= resizeAlpha_)){
-        //cout << "yuh" <<endl;
+    if(((static_cast<double>(items)+deleteditems)/CAPACITIES[mIndex_] >= resizeAlpha_)){
         resize();
     }
 
@@ -374,7 +372,9 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
         table_[index]->item.second = p.second;
     }else{
         table_[index] = new HashItem(p);
+        ++items;
     }
+    
 }
 
 // To be completed
@@ -382,6 +382,7 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 {
   ++ deleteditems;
+  --items;
   if(internalFind(key)){
     internalFind(key)->deleted = true;
   }
@@ -459,19 +460,17 @@ typename HashTable<K,V,Prober,Hash,KEqual>::HashItem* HashTable<K,V,Prober,Hash,
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
-    //cout << "resize"<< endl;
     ++mIndex_;
     size_t newsize = CAPACITIES[mIndex_];
-   // cout << "new size"<< CAPACITIES[mIndex_]<<endl;
-
     std::vector<HashItem*> oldtable_(std::move(table_));
     table_.clear();
     table_.resize(newsize);
-
+    items = 0;
     for(size_t i = 0; i < oldtable_.size(); i++){
         if(oldtable_[i]!=nullptr&&(oldtable_[i]->deleted != true)){
             size_t index = probe(oldtable_[i]->item.first);
             table_[index] = oldtable_[i];
+            ++items;
         }
     }
     deleteditems = 0;

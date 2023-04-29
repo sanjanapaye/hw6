@@ -471,7 +471,11 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
             size_t index = probe(oldtable_[i]->item.first);
             table_[index] = oldtable_[i];
             ++items;
-        }
+        }else{
+					if(oldtable_[i]!=nullptr){
+						delete oldtable_[i];
+					}
+				}
     }
     deleteditems = 0;
 }

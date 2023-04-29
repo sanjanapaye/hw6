@@ -10,6 +10,7 @@
 #endif
 
 #include "boggle.h"
+using namespace std;
 
 std::vector<std::vector<char> > genBoard(unsigned int n, int seed)
 {
@@ -95,5 +96,33 @@ bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>
 								   std::string word, std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
 //add your solution here!
+	if(c<0||c>=board.size()||r<0||r>=board.size()){
+		
+	if(dict.find(word)!=dict.end()){
+			result.insert(word);
+			return true;
+	}
+		return false;
+	}
 
+	word.push_back(board[r][c]);
+
+	if(prefix.find(word)==prefix.end()){
+		if(dict.find(word)!=dict.end()){
+			result.insert(word);
+			return true;
+		}
+	}
+
+	if(boggleHelper(dict, prefix, board, word, result, r+dr, c+dc, dr, dc)){
+		return true;
+	}
+
+	word.pop_back();
+	if(dict.find(word)!=dict.end()){
+			result.insert(word);
+			return true;
+	}
+	return false;
 }
+
